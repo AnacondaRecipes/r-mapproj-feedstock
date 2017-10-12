@@ -1,4 +1,4 @@
-{% set version = '1.2-4' %}
+{% set version = '1.2-5' %}
 
 {% set posix = 'm2-' if win else '' %}
 {% set native = 'm2w64-' if win else '' %}
@@ -12,36 +12,50 @@ source:
   url:
     - https://cran.r-project.org/src/contrib/mapproj_{{ version }}.tar.gz
     - https://cran.r-project.org/src/contrib/Archive/mapproj/mapproj_{{ version }}.tar.gz
-  sha256: cf8a1535f57e7cca0a71b3a551e77ad3e7a78f61a94bb19effd3de19dbe7dceb
+  sha256: f3026a3a69a550c923b44c18b1ccc60d98e52670a438250d13f3c74cf2195f66
+
+
+  # patches:
+   # List any patch files here
+   # - fix.patch
 
 build:
+  # If this is a new build for the same version, increment the build number.
   number: 0
-  # r-maps is missing in win64 as well
-  skip: true  # [win]
+
+  # This is required to make R link correctly on Linux.
   rpaths:
     - lib/R/lib/
     - lib/
 
+
 requirements:
   build:
     - r-base
+    - {{ compiler('c') }}        # [not win]
+    - {{native}}toolchain        # [win]
     - r-maps >=2.3_0
-    - posix                # [win]
-    - {{native}}toolchain  # [win]
-    - gcc                  # [not win]
 
   run:
     - r-base
+    - {{native}}gcc-libs         # [win]
     - r-maps >=2.3_0
 
 test:
   commands:
-    - $R -e "library('mapproj')"  # [not win]
+    # You can put additional test commands to be run here.
+    - $R -e "library('mapproj')"           # [not win]
     - "\"%R%\" -e \"library('mapproj')\""  # [win]
+
+  # You can also put a file called run_test.py, run_test.sh, or run_test.bat
+  # in the recipe that will be run at test time.
+
+  # requires:
+    # Put any additional test requirements here.
 
 about:
   home: https://CRAN.R-project.org/package=mapproj
-  license: Lucent Public
+  license: Lucent Public License
   summary: Converts latitude/longitude into projected coordinates.
   license_family: OTHER
 
@@ -49,3 +63,25 @@ extra:
   recipe-maintainers:
     - johanneskoester
     - bgruening
+    - mingwandroid
+
+# The original CRAN metadata for this package was:
+
+# Package: mapproj
+# Title: Map Projections
+# Version: 1.2-5
+# Date: 2017-06-06
+# Author: Doug McIlroy.  Packaged for R by Ray Brownrigg and Thomas P Minka, transition to Plan 9 codebase by Roger Bivand.
+# Description: Converts latitude/longitude into projected coordinates.
+# Depends: maps (>= 2.3-0)
+# Imports: stats, graphics
+# License: Lucent Public License
+# Maintainer: Alex Deckmyn <alex.deckmyn@meteo.be>
+# NeedsCompilation: yes
+# Packaged: 2017-06-07 08:34:30 UTC; dalex
+# Repository: CRAN
+# Date/Publication: 2017-06-08 04:43:11 UTC
+
+# See
+# http://docs.continuum.io/conda/build.html for
+# more information about meta.yaml
